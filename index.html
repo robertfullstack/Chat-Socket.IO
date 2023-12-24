@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>Socket.IO chat</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        body {
+            margin: 0;
+            padding-bottom: 3rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        #form {
+            background: black;
+            padding: 0.25rem;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            height: 3rem;
+            box-sizing: border-box;
+            backdrop-filter: blur(10px);
+        }
+
+        #input {
+            border: none;
+            padding: 0 1rem;
+            flex-grow: 1;
+            border-radius: 2rem;
+            margin: 0.25rem;
+        }
+
+        #input:focus {
+            outline: none;
+        }
+
+        #form>button {
+            background: #333;
+            border: none;
+            padding: 0 1rem;
+            margin: 0.25rem;
+            border-radius: 3px;
+            outline: none;
+            color: #fff;
+        }
+
+
+
+        #messages {
+            list-style-type: none;
+            margin: 40px;
+            padding: 0;
+        }
+
+        #messages>li {
+            border-radius: 5px;
+            margin: 1px;
+            padding: 0.5rem 1rem;
+        }
+
+        #messages>li:nth-child(odd) {
+            background: #fff;
+        }
+
+        h2 {
+            background-color: black;
+            text-align: center;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        p {
+            background-color: black;
+            text-align: center;
+            height: 100%;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: start;
+            color: rgb(10, 197, 10);
+        }
+    </style>
+
+</head>
+
+<body>
+    <h2>Chat Global</h2>
+    <p>[Qualquer um que acessar esse chat poderá visualizar suas mensagens.]</p>
+    <ul id="messages"></ul>
+
+    <form id="form" action="">
+
+        <input id="input" autocomplete="off" autofocus /><button>Enviar</button>
+
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+        var socket = io();
+        var nome = prompt('Nome :');
+
+        socket.emit('new user', nome);
+        socket.on('new user', function (data) {
+            if (data.success) {
+                alert('Bem vindo ao Sistema...')
+            } else {
+                alert('Já existe um usuário com este nome...')
+                window.location.href = "/";
+                // Usado para retornar para rota '/', repetindo o procedimento. 
+                // Sem que precise um loop para ficar rodando até que ter certo.
+            }
+        })
+
+
+
+        var messages = document.getElementById('messages');
+        var form = document.getElementById('form');
+        var input = document.getElementById('input');
+
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (input.value) {
+                socket.emit('chat message', { msg: input.value, nome: nome });
+                input.value = '';
+            }
+        });
+
+
+        socket.on('chat message', function (obj) {
+
+            if (obj.nome == nome) {
+                var item = document.createElement('li');
+                item.style.backgroundColor = 'gray';
+                item.textContent = obj.nome + ': ' + obj.msg
+                messages.appendChild(item)
+                window.scrollTo(0, document.body.scrollHeight)
+            } else {
+                var item = document.createElement('li');
+                item.textContent = obj.nome + ': ' + obj.msg;
+                messages.appendChild(item);
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+
+        });
+
+    </script>
+
+
+</body>
+
+</html>
