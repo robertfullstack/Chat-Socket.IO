@@ -1,8 +1,2 @@
-$ cat .gitattributes
-public/* linguist-generated
-scot-ui/public/* linguist-generated
-
-$ github-linguist
-39.00%  HTML
-70.00%  JavaScript
-
+* linguist-vendored
+*.js linguist-vendored=false
